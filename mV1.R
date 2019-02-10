@@ -42,7 +42,7 @@ fi_regions <- st_read(fi_regions_wfs)
  fi_regions <- subset(fi_regions,propertyname ="provcode" )
 head(fi_regions)
 
-mapview(fi_regions, label = fi_regions$provcode, color = "darkgreen", col.regions = "green", alpha.regions = .05)
+mapview(fi_regions$geometry, label = fi_regions$provcode, color = "darkgreen", col.regions = "green", alpha.regions = .05)
 
 # Convert parsed JSON file to data frame
 json_fi_regions_df<- as.data.frame(fi_regions)
