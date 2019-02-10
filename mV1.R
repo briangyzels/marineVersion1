@@ -28,17 +28,20 @@ names(json_parsed_content)
 
 # Get a 2nd JSON response
 #GAZT2_json <- GET( "http://geo.vliz.be/geoserver/wfs?request=getfeature"&service=wfs, version=1.1.0, typename=MarineRegions:longhurst, outputformat=json, filter=<PropertyIsEqualTo><PropertyName>provcode</PropertyName><Literal>NECS</Literal></PropertyIsEqualTo>)
-stop_for_status(GAZT2_json)  # convert HTTP errors to R errors
-names(GAZT2_json)
-GAZT2_json$status_code
-GAZT2_json$headers$`content-type`
+# stop_for_status(GAZT2_json)  # convert HTTP errors to R errors
+# names(GAZT2_json)
+# GAZT2_json$status_code
+# GAZT2_json$headers$`content-type`
 
 #Using SF and MAPVIEW package
 baseurl <- "http://geo.vliz.be/geoserver/wfs?"
-wfs_request <- "request=GetFeature&service=WFS&version=1.1.0&typeName=MarineRegions:longhurst&outputFormat=json&propertyName=provcode&literal=NECS"
+#&propertyName=provcode&literal=NECS
+wfs_request <- "request=GetFeature&service=WFS&version=1.1.0&typeName=MarineRegions:longhurst&outputFormat=json"
 fi_regions_wfs <- paste0(baseurl,wfs_request)
 fi_regions <- st_read(fi_regions_wfs)
+ fi_regions <- subset(fi_regions,propertyname ="provcode" )
 head(fi_regions)
+
 mapview(fi_regions, label = fi_regions$provcode, color = "darkgreen", col.regions = "green", alpha.regions = .05)
 
 # Convert parsed JSON file to data frame
