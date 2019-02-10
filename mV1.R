@@ -4,6 +4,7 @@ install.packages("httr")
 install.packages("jsonlite")
 install.packages("sf")
 install.packages("mapview")
+install.packages("gdalUtils")
 
 library("httr")
 library("jsonlite")
@@ -11,6 +12,7 @@ library("robis")
 library("sf")
 library("mapview")
 library("mregions")
+library("gdalUtils")
 
 # Get a JSON response
 GAZT_json <- GET("http://marineregions.org/rest/getGazetteerWMSes.json/21460/")
@@ -18,6 +20,7 @@ stop_for_status(GAZT_json)  # convert HTTP errors to R errors
 names(GAZT_json)
 GAZT_json$status_code
 GAZT_json$headers$`content-type`
+
 
 # Parse with httr
 json_text_content <- content(GAZT_json, as = "text")
@@ -34,12 +37,24 @@ GAZT2_json$status_code
 GAZT2_json$headers$`content-type`
 
 #Using SF and MAPVIEW package
-baseurl <- "http://geo.vliz.be/geoserver/wfs?"
-wfs_request <- "request=GetFeature&service=WFS&version=1.1.0&typeName=MarineRegions:longhurst&outputFormat=json&propertyName=provcode&literal=NECS"
-fi_regions_wfs <- paste0(baseurl,wfs_request)
-fi_regions <- st_read(fi_regions_wfs)
-head(fi_regions)
-mapview(fi_regions, label = fi_regions$provcode, color = "darkgreen", col.regions = "green", alpha.regions = .05)
+wfs_request="WFS:http://geo.vliz.be/geoserver/wfs?"
+info <- ogrinfo(wfs_request)
+cat(info, sep = "\n")
+
+query = list(service = "WFS",
+             request = "GetFeature",
+             version = "1.1.0",
+             typeName = "MarineRegions:Longhurst",
+             outputFormat = "json",
+             propertyname = "provcode",
+             literal = "NECS",
+             CQL_FILTER = sprintf("INTERSECTS(geom,POINT(%s %s))",
+                                  x_lam, y_lam)) ## waarnemingen van bv. Abra alba
+result_wfs <- GET(wfs_request, query = query)
+result_wfs
+result <- st_read(result_wfs)
+head(result)
+mapview(result, label = result$provcode, color = "darkgreen", col.regions = "green", alpha.regions = .05)
 
 # Convert parsed JSON file to data frame
 json_fi_regions_df<- as.data.frame(fi_regions)
