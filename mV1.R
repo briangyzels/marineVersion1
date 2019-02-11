@@ -31,9 +31,7 @@ data2 <- checklist(geometry = "POLYGON ((2.59689 51.16772, 2.62436 51.14059, 2.7
 datasets <- dataset(seq(2500, 2520))
 
 res1 <- mr_records_by_type(type = "EEZ")
-shp <- mr_shp(key = "MarineRegions:eez")
 library(leaflet)
-leaflet() %>%
   addTiles() %>%
   addPolygons(data = shp)
 
