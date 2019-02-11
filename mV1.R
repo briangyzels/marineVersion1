@@ -62,7 +62,7 @@ result_wfs <- GET(wfs_request, query = query)
 result_wfs
 result <- st_read(result_wfs)
 head(result)
-mapview(result, label = result$NECS, color = "darkgreen", col.regions = "green", alpha.regions = .05)
+mapview(result, label = result$provcode, color = "darkgreen", col.regions = "green", alpha.regions = .05)
 
 # Convert parsed JSON file to data frame
 json_fi_regions_df<- as.data.frame(fi_regions)
