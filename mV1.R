@@ -33,12 +33,16 @@ library("leaflet")
 # data2 <- checklist(geometry = "POLYGON ((2.59689 51.16772, 2.62436 51.14059, 2.76066 51.19225, 2.73216 51.20946, 2.59689 51.16772))")
 # datasets <- dataset(seq(2500, 2520))
 
-res1 <- mr_records_by_type(type = "EEZ")
+types <- mr_place_types()
+head(places$type)
 
+x <- grep("LONGHURST", types$type,ignore.case = TRUE, value = TRUE)
+res <- mr_records_by_type(type=x)
+res <- 
 # map waarnemingen en polygonen op 1 kaart
 data <- occurrence("Abra alba") #Restrict fields in result set
  
-shp <- mr_shp(key = "MarineRegions:EEZ", maxFeatures = 5)
+shp <- mr_shp(key = "MarineRegions:longhurst", read = TRUE)
 
 map <-leaflet() %>%
       addTiles() %>%
@@ -52,8 +56,10 @@ map
 d <- data.frame(data$decimalLatitude,data$decimalLongitude)
 d
 coords <-SpatialPoints(d, proj4string=CRS(as.character(NA)), bbox = NULL)
-s <- as.SpatialPolygons.PolygonsList(shp@polygons[[1]], proj4string=CRS(as.character(NA)))
-
-a <- sp::over(coords,s)
+s <- as.SpatialPolygons.PolygonsList(shp@polygons, proj4string=CRS(as.character(NA)))
+leaflet() %>%
+  addTiles() %>%
+addPolygons(data = shp)
+a <- sp::over(coords,s@polygons)
 sum(a,na.rm = TRUE)
  
