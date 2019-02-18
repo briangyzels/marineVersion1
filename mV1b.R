@@ -36,17 +36,28 @@ d
 # res <- mr_records_by_type(type=x)
 # res  
 # map waarnemingen en polygonen op 1 kaart
-#zonder loop
+#met loop
+
+
+
 keys <- c("MarineRegions:longhurst","MarineRegions:eez")
-fit = list()
+coords <-SpatialPoints(d, proj4string=CRS(as.character(NA)), bbox = NULL)
+
+function(keys,coords) {
+  fit = list()
  
 for (i in 1:length(keys)){
  shp <- mr_shp(key = keys[i])
-s <- as.SpatialPolygons.PolygonsList(shp@polygons, proj4string=CRS(as.character(NA)))  
-a <- sp::over(coords,s)
-fit[i] <- round(x=length(a[complete.cases(a)]) / length(coords),2)
+spatialpolygonsList <- as.SpatialPolygons.PolygonsList(shp@polygons, proj4string=CRS(as.character(NA)))  
+pointsWithPolygonsJoin <- sp::over(coords,spatialpolygonsList)
+fit[i] <- round(x=length(pointsWithPolygonsJoin[complete.cases(pointsWithPolygonsJoin)]) / length(coords),2)
 
 } 
+
+}
+
+ 
+ 
 #zonder loop
 shp <- mr_shp(key = "MarineRegions:longhurst")
 
@@ -55,7 +66,7 @@ shp <- mr_shp(key = "MarineRegions:longhurst")
 #   addMarkers(data=data,lng = ~decimalLongitude,lat = ~decimalLatitude) %>%
 #   addPolygons(data = shp)
 
-coords <-SpatialPoints(d, proj4string=CRS(as.character(NA)), bbox = NULL)
+
  
 s <- as.SpatialPolygons.PolygonsList(shp@polygons, proj4string=CRS(as.character(NA))) 
 #check of punten in polygonen zitten

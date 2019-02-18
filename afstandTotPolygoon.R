@@ -8,6 +8,12 @@ install.packages("gdalUtils")
 install.packages("rmapshaper")
 install.packages("leaflet")
 install.packages("plyr")
+install.packages("sp")
+install.packages("spdep")
+install.packages("rgeos")
+install.packages("cartography")
+library("cartography")
+library("rgeos")
 library("plyr")
 library("httr")
 library("jsonlite")
@@ -16,7 +22,8 @@ library("sf")
 library("mapview")
 library("mregions")
 library("gdalUtils")
-
+library("sp")
+library("spdep")
 
 #Robis package
 library("robis", lib.loc="~/R/win-library/3.5")
@@ -35,21 +42,38 @@ d
 # res  
 # map waarnemingen en polygonen op 1 kaart
 data <- occurrence("Abra alba")  
+keys <- c("MarineRegions:longhurst")
+,"MarineRegions:eez"
+fit = list()
+values = list()
+for (i in 1:length(keys)){
+  shp <- mr_shp(key = keys[i])
+  spatialpolygonsList <- as.SpatialPolygons.PolygonsList(shp@polygons, proj4string=CRS(as.character(NA)))  
+  pointsWithPolygonsJoin <- sp::over(coords,spatialpolygonsList)
+  fit[i] <- round(x=length(pointsWithPolygonsJoin[complete.cases(pointsWithPolygonsJoin)]) / length(coords),2)
+listWithPointsInpolygons <-  pointsWithPolygonsJoin[complete.cases(pointsWithPolygonsJoin)]
+spatialpolygonsList@polygons[1]
 
-shp <- mr_shp(key = "MarineRegions:longhurst")
+getBorders()
+# for (j in 1:length(listWithPointsInpolygons)){
+#    st_nearest_points(coords[1], listWithPointsInpolygons[i])
+#   
+# }  
+} 
 
+#Probleem: zorg dat je de index van elke waarde in listWithPointsInpolygons kunt bepalen 
+# zodat je coords kan gebruiken om het dichtste coordinaat tussen polygoon en waarneming
+#coordinaat kunt bepalen
 
+ listWithPointsInpolygons 
+pointsWithPolygonsJoin
+values[i] <-  apply(gDistance(coords, spatialpolygonsList,byid=TRUE),2,min)
+r = sqrt(2)/10
+pt1 = st_point(c(.1,.1))
+pt2 = st_point(c(.9,.9))
 
-leaflet() %>%
-  addTiles() %>%
-  addMarkers(data=data,lng = ~decimalLongitude,lat = ~decimalLatitude) %>%
-  addPolygons(data = shp)
+b1 <- st_buffer(pt1, r)
+b2 <- st_buffer(pt2, r)
+st_nearest_points(b2, b1)
 
-coords <-SpatialPoints(d, proj4string=CRS(as.character(NA)), bbox = NULL)
-s <- as.SpatialPolygons.PolygonsList(shp@polygons, proj4string=CRS(as.character(NA)))
-#check of punten in polygonen zitten
-a <- sp::over(coords,s)
-# fitting
-fit <- round(x=length(a[complete.cases(a)]) / length(coords),2)
-fit
 
