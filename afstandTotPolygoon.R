@@ -49,6 +49,7 @@ keys <- c("MarineRegions:lme")
 # ,"MarineRegions:longhurst"
 fit = list()
 values = list()
+#fit bereken voor elke polygoonsoort
 for (i in 1:length(keys)){
   shp <- mr_shp(key = keys[i])
   spatialpolygonsList <- as.SpatialPolygons.PolygonsList(shp@polygons, proj4string=CRS(as.character(NA)))  
@@ -59,16 +60,20 @@ listWithPointsInpolygons <- data.frame(polygon = pointsWithPolygonsJoin[complete
 listWithPointsInpolygons <- data.frame(point = rownames(listWithPointsInpolygons), polygon = listWithPointsInpolygons)
   
 
-
+#lijst maken van afstandmetingen
+#note: Dit kan nog geoptimalizeerd worden 
 lijst2 <-list()
+lijstAfstandTotMiddelpunt <- list()
 for (j in  1:nrow(listWithPointsInpolygons)){
-   
-# lijst[j]  <-  coords[listWithPointsInpolygons2[j,"point"]]
-   lijst[j]  <-  gDistance(coords[listWithPointsInpolygons[j,"point"]],spatialpolygonsList[listWithPointsInpolygons[j,"polygon"]])
+  
+  lijst[j]  <-  gDistance(coords[listWithPointsInpolygons[j,"point"]],spatialpolygonsList[listWithPointsInpolygons[j,"polygon"]])
+  lijstAfstandTotMiddelpunt[j] <-gDistance(coords[listWithPointsInpolygons[j,"point"]],gCentroid(spatialpolygonsList[listWithPointsInpolygons[j,"polygon"]]))
   lijst2[j] <- listWithPointsInpolygons[j,"point"]
 }
 # gemiddelde afstand tot polygoonrand
 avgDistanceToPolygonBorder <- round(mean(as.numeric(lijst)),3)
+# gemiddelde afstand tot polygooncentrum
+avgDistanceToPolygonCenter <- round(mean(as.numeric(lijstAfstandTotMiddelpunt)),3)
 } 
 
 #hard coded testing
