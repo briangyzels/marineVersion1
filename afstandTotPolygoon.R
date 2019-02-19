@@ -12,6 +12,8 @@ install.packages("sp")
 install.packages("spdep")
 install.packages("rgeos")
 install.packages("cartography")
+install.packages("rindex")
+install.packages("data.table", dependencies=TRUE)
 library("cartography")
 library("rgeos")
 library("plyr")
@@ -23,16 +25,16 @@ library("mapview")
 library("mregions")
 library("gdalUtils")
 library("sp")
-library("spdep")
-
+library("spdep") 
 #Robis package
 library("robis", lib.loc="~/R/win-library/3.5")
 library("leaflet")
 
 #check of waarnemingen in een polygoon liggen
 #werkt
+data <- occurrence("Solea solea") 
 d <- data.frame(data$decimalLatitude,data$decimalLongitude)
-d
+coords <-SpatialPoints(d, proj4string=CRS(as.character(NA)), bbox = NULL)
 #werkt niet
 # types <- mr_place_types()
 # head(places$type)
@@ -41,9 +43,10 @@ d
 # res <- mr_records_by_type(type=x)
 # res  
 # map waarnemingen en polygonen op 1 kaart
-data <- occurrence("Abra alba")  
-keys <- c("MarineRegions:longhurst")
-,"MarineRegions:eez"
+shpdummy <- mr_shp(key = "MarineRegions:lme" )
+ 
+keys <- c("MarineRegions:lme")
+# ,"MarineRegions:longhurst"
 fit = list()
 values = list()
 for (i in 1:length(keys)){
@@ -51,29 +54,37 @@ for (i in 1:length(keys)){
   spatialpolygonsList <- as.SpatialPolygons.PolygonsList(shp@polygons, proj4string=CRS(as.character(NA)))  
   pointsWithPolygonsJoin <- sp::over(coords,spatialpolygonsList)
   fit[i] <- round(x=length(pointsWithPolygonsJoin[complete.cases(pointsWithPolygonsJoin)]) / length(coords),2)
-listWithPointsInpolygons <-  pointsWithPolygonsJoin[complete.cases(pointsWithPolygonsJoin)]
-spatialpolygonsList@polygons[1]
+listWithPointsInpolygons <- data.frame(polygon = pointsWithPolygonsJoin[complete.cases(pointsWithPolygonsJoin)]) 
+ 
+listWithPointsInpolygons <- data.frame(point = rownames(listWithPointsInpolygons), polygon = listWithPointsInpolygons)
+  
 
-getBorders()
-# for (j in 1:length(listWithPointsInpolygons)){
-#    st_nearest_points(coords[1], listWithPointsInpolygons[i])
-#   
-# }  
+
+lijst2 <-list()
+for (j in  1:nrow(listWithPointsInpolygons)){
+   
+# lijst[j]  <-  coords[listWithPointsInpolygons2[j,"point"]]
+   lijst[j]  <-  gDistance(coords[listWithPointsInpolygons[j,"point"]],spatialpolygonsList[listWithPointsInpolygons[j,"polygon"]])
+  lijst2[j] <- listWithPointsInpolygons[j,"point"]
+}
+# gemiddelde afstand tot polygoonrand
+avgDistanceToPolygonBorder <- round(mean(as.numeric(lijst)),3)
 } 
 
+#hard coded testing
+datadummy <- c(data[3542,"decimalLatitude"],data[3542,"decimalLongitude"])
+
+map <-leaflet() %>%
+  addTiles() %>%
+  
+  addMarkers(data=datadummy,lat = 57.3117,lng = 12.1228) %>%
+  addPolygons(data = shp,fillColor = "#FF0000")
+
+map
 #Probleem: zorg dat je de index van elke waarde in listWithPointsInpolygons kunt bepalen 
 # zodat je coords kan gebruiken om het dichtste coordinaat tussen polygoon en waarneming
 #coordinaat kunt bepalen
 
- listWithPointsInpolygons 
-pointsWithPolygonsJoin
-values[i] <-  apply(gDistance(coords, spatialpolygonsList,byid=TRUE),2,min)
-r = sqrt(2)/10
-pt1 = st_point(c(.1,.1))
-pt2 = st_point(c(.9,.9))
 
-b1 <- st_buffer(pt1, r)
-b2 <- st_buffer(pt2, r)
-st_nearest_points(b2, b1)
 
 
