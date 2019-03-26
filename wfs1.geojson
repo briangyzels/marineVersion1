@@ -1,0 +1,8 @@
+{
+"type": "FeatureCollection",
+"name": "MarineRegions:longhurst",
+"crs": { "type": "name", "properties": { "name": "urn:ogc:def:crs:EPSG::31370" } },
+"features": [
+
+]
+}

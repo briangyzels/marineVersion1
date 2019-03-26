@@ -1,4 +1,10 @@
 library("mregions")
+library("worrms")
+ABRALBADATA <- wm_distribution_(141433)
+install.packages("igraph")
+library("igraph")
+library("devtools")
+
 types <- mr_place_types()
 reg<- mr_records_by_type(type = "EEZ")
 reg2<- mr_records_by_type(type = "EEZ", offset=100)
@@ -88,3 +94,14 @@ par(mfrow=c(1,1))
 #https://cran.r-project.org/web/packages/sp/vignettes/over.pdf
 #https://www.rdocumentation.org/packages/rgeos/versions/0.4-2/topics/gUnion
 
+#vergelijken met uitkomst in aquamaps
+install_github("raquamaps/aquamapsdata")
+library("aquamapsdata")
+library("purrr")
+download_db(force = TRUE)
+my_db <- aquamapsdata:::src_sqlite_aquamapsdata()
+my_db %>% tbl("nativemaps")
+my_db %>% tbl("hcaf")
+my_db %>% tbl("hspen")
+my_db %>% tbl("occ")
+my_db %>% tbl("taxa")

@@ -5,6 +5,8 @@ install.packages("jsonlite")
 install.packages("sf")
 install.packages("mapview")
 install.packages("gdalUtils")
+install.packages("RCassandra")
+install.packages("leaflet")
 
 library("httr")
 library("jsonlite")
@@ -13,6 +15,9 @@ library("sf")
 library("mapview")
 library("mregions")
 library("gdalUtils")
+library("RCassandra")
+library("leaflet")
+library("devtools")
 
 # Get a JSON response
 GAZT_json <- GET("http://marineregions.org/rest/getGazetteerWMSes.json/21460/")
@@ -40,9 +45,6 @@ mapview(GAZT2_json, label=GAZT2_json$status_code, color = "darkgreen", col.regio
 
 #Using SF and MAPVIEW package
 wfs_request="WFS:http://geo.vliz.be/geoserver/wfs?"
-info <- ogrinfo(wfs_request)
-cat(info, sep = "\n")
-
 query = list(service = "WFS",
              request = "GetFeature",
              version = "1.1.0",
@@ -79,7 +81,7 @@ View(data)
 data <- occurrence("Abra alba", fields = c("decimalLongitude", "decimalLatitude")) #Restrict fields in result set
 data <- occurrence("Abra nitida", qc = c(22, 23))#Filter occurrences by QC flags
 data <- occurrence("Abra alba", geometry = "POLYGON ((2.59689 51.16772, 2.62436 51.14059, 2.76066 51.19225, 2.73216 51.20946, 2.59689 51.16772))")#Get occurrences by geometry
-leafletmap(data)#Plot occurrences on a Leaflet map
+map_leaflet(data)#Plot occurrences on a Leaflet map
 data <- checklist("Semelidae", year = 2005)
 data2 <- checklist(geometry = "POLYGON ((2.59689 51.16772, 2.62436 51.14059, 2.76066 51.19225, 2.73216 51.20946, 2.59689 51.16772))")
 datasets <- dataset(seq(2500, 2520))
