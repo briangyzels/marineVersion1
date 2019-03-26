@@ -85,5 +85,6 @@ par(mfrow=c(1,1))
 ## nicer figures => GGPLOT2
 
 #Volgende stap is het selecteren van enkele meow polygonen/provincies/realms en de overlapping te plotten met gazetteer gebieden
+#https://cran.r-project.org/web/packages/sp/vignettes/over.pdf
 #https://www.rdocumentation.org/packages/rgeos/versions/0.4-2/topics/gUnion
 
