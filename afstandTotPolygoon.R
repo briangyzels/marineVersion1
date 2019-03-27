@@ -12,8 +12,8 @@ install.packages("sp")
 install.packages("spdep")
 install.packages("rgeos")
 install.packages("cartography")
-install.packages("rindex")
-install.packages("data.table", dependencies=TRUE)
+
+
 library("cartography")
 library("rgeos")
 library("plyr")
@@ -57,32 +57,36 @@ for (i in 1:length(keys)){
   fit[i] <- round(x=length(pointsWithPolygonsJoin[complete.cases(pointsWithPolygonsJoin)]) / length(coords),2)
 listWithPointsInpolygons <- data.frame(polygon = pointsWithPolygonsJoin[complete.cases(pointsWithPolygonsJoin)]) 
  
-listWithPointsInpolygons <- data.frame(point = rownames(listWithPointsInpolygons), polygon = listWithPointsInpolygons)
-  
-
+listWithPointsInpolygons <- data.frame(point = rownames(listWithPointsInpolygons), polygon = listWithPointsInpolygons,row.names = NULL)
+ 
 #lijst maken van afstandmetingen
 #note: Dit kan nog geoptimalizeerd worden 
-lijst2 <-list()
+lijstAfstandTotBorder <-list()
 lijstAfstandTotMiddelpunt <- list()
 for (j in  1:nrow(listWithPointsInpolygons)){
+  coord <-coords[listWithPointsInpolygons[j,"point"]]
+  polygon <-spatialpolygonsList[listWithPointsInpolygons[j,"polygon"]]
+  lijstAfstandTotBorder[j]  <-  gDistance(coord,polygon)
+  lijstAfstandTotMiddelpunt[j] <- gDistance(coord,gCentroid(polygon))
   
-  lijst[j]  <-  gDistance(coords[listWithPointsInpolygons[j,"point"]],spatialpolygonsList[listWithPointsInpolygons[j,"polygon"]])
-  lijstAfstandTotMiddelpunt[j] <-gDistance(coords[listWithPointsInpolygons[j,"point"]],gCentroid(spatialpolygonsList[listWithPointsInpolygons[j,"polygon"]]))
-  lijst2[j] <- listWithPointsInpolygons[j,"point"]
 }
 # gemiddelde afstand tot polygoonrand
-avgDistanceToPolygonBorder <- round(mean(as.numeric(lijst)),3)
+avgDistanceToPolygonBorder <- round(mean(as.numeric(lijstAfstandTotBorder)),3)
 # gemiddelde afstand tot polygooncentrum
 avgDistanceToPolygonCenter <- round(mean(as.numeric(lijstAfstandTotMiddelpunt)),3)
 } 
 
+#code voor testing in loop
+lijst2[j] <- listWithPointsInpolygons[j,"point"]
 #hard coded testing
-datadummy <- c(data[3542,"decimalLatitude"],data[3542,"decimalLongitude"])
 
+datadummy <- c(data[3542,"decimalLatitude"],data[3542,"decimalLongitude"])
+w <- gCentroid(spatialpolygonsList[22],byid = TRUE)
+w
 map <-leaflet() %>%
   addTiles() %>%
   
-  addMarkers(data=datadummy,lat = 57.3117,lng = 12.1228) %>%
+  addMarkers(data=datadummy,lat = c(57.3117,62.84666),lng = c(12.1228,16.26404)) %>%
   addPolygons(data = shp,fillColor = "#FF0000")
 
 map

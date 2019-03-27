@@ -1,10 +1,27 @@
-library("mregions")
-library("worrms")
-ABRALBADATA <- wm_distribution_(141433)
 install.packages("igraph")
+install_github("raquamaps/aquamapsdata")
+install.packages("data.table") 
+ 
+library("worrms")
+
+library("aquamapsdata")
+library("purrr")
+
 library("igraph")
 library("devtools")
+library(rgdal)
+library(maptools)
+library(rgeos)
+library(dplyr)
+library('httr')
+library('data.table')
+library("mregions")
+library("robis")
+library('leaflet')
 
+
+
+ABRALBADATA <- wm_distribution_(141433)
 types <- mr_place_types()
 reg<- mr_records_by_type(type = "EEZ")
 reg2<- mr_records_by_type(type = "EEZ", offset=100)
@@ -31,31 +48,42 @@ sea<- mr_records_by_type(type = "Sea")
 #39 plaatsen zoeken in deze en plotten op kaart
 #https://recology.info/2016/06/marine-regions/
 shp <- mr_shp(key= "MarineRegions:eez",filter = "Belgian Exclusive Economic Zone")
+View(wkt)
 wkt <- mr_as_wkt(shp)
-library('httr')
-library('data.table')
+gArea(readWKT(wkt))
 args <- list(scientificname = "Abra alba", geometry = wkt, limit = 100)
 res <- httr::GET('http://api.iobis.org/occurrence', query = args)
+
 xx <- data.table::setDF(data.table::rbindlist(httr::content(res)$results, use.names = TRUE, fill = TRUE))
+ 
+#ophalen van waarneming doormiddel van robis pakket en vervolgens spatialpoint van te maken
+data <- occurrence("Abra alba") 
+d <- data.frame(data$decimalLatitude,data$decimalLongitude)
+coords <-SpatialPoints(d, proj4string=CRS(as.character(NA)), bbox = NULL)
+shp <- mr_shp(key= "Ecoregions:ecoregions", maxFeatures = 1000)
+
 xx <- xx[, c('scientificName', 'decimalLongitude', 'decimalLatitude')]
 names(xx)[2:3] <- c('longitude', 'latitude')
-library('leaflet')
+
+#plot met polygonen met polygonen in het blauw en waarnemingen in het rood
 leaflet() %>%
   addTiles() %>%
-  addCircleMarkers(data = xx) %>%
+  addCircleMarkers(data = coords,color = "red") %>%
   addPolygons(data = shp)
 
 #MEOW, LME, ... polygonen selecteren die overlappen met gebied uit gazetteer
 shp <- mr_geojson(name= "meow") 
-shp <- mr_shp(key= "MarineRegions:meow")#dit argument lijkt niet te bestaan?
-#http://www.imachordata.com/meow-its-marine-ecoregions-in-r-2/
-library(rgdal)
-library(maptools)
-library(rgeos)
-library(dplyr)
+res<- mr_geojson(key= "Ecoregions:ecoregions") #MEOW
+#Brian: zo haal je MEOW op
+shp <- mr_shp(key= "Ecoregions:ecoregions")#dit argument lijkt niet te bestaan? 
+#http://www.imachordata.com/meow-its-marine-ecoregions-in-r-2/ 
+
+
+#nog nodig?
 #https://databasin.org/datasets/3b6b12e7bcca419990c9081c0af254a2 download shapefiles in zip bestand en unzip
 ogrInfo("../../MEOW-TNC", "meow_ecos") # naam mgl veranderen
 #Unite the spatial polygons for each region into one
+ 
 provinces <- unionSpatialPolygons(regions, regions$PROVINCE) #hogere orde= gemakkelijker?
 #Make a data frame that will have Province level info and above
 prov_data <- regions@data %>%
@@ -95,9 +123,7 @@ par(mfrow=c(1,1))
 #https://www.rdocumentation.org/packages/rgeos/versions/0.4-2/topics/gUnion
 
 #vergelijken met uitkomst in aquamaps
-install_github("raquamaps/aquamapsdata")
-library("aquamapsdata")
-library("purrr")
+
 download_db(force = TRUE)
 my_db <- aquamapsdata:::src_sqlite_aquamapsdata()
 my_db %>% tbl("nativemaps")
