@@ -4,17 +4,21 @@ install.packages("data.table")
 install.packages("devtools")
 install_github("ropenscilabs/mregions")
 install.packages("curl")
+install.packages("qdap")
 library("aquamapsdata")
 library("purrr")
-library("worrms")
+
 library("igraph")
 library("devtools")
 library(rgdal)
 library(maptools)
-library(rgeos)
+library(qdap)
 library(dplyr)
 library('httr')
 library('data.table')
+
+library("worrms")
+library(rgeos)
 library("mregions")
 library("robis")
 library('leaflet')
@@ -31,16 +35,17 @@ d <- data.frame(data$decimalLongitude,data$decimalLatitude)
 coords <-SpatialPoints(d, proj4string=CRS(as.character(NA)), bbox = NULL)
 #shape file ophalen MEOW  
 shapeEcoregions<- mr_shp(key= "Ecoregions:ecoregions", maxFeatures = 1000)
+shp <- mr_shp(key = "3293")
 #ophalen een specifiek gebied gazetteer
 shapefilter <- mr_shp(
   key = "MarineRegions:eez",
   filter ="Dutch Exclusive Economic Zone",  maxFeatures = 300
 )
-
+#fit van 1 polygon met waarnemingen
 spatialpolygonsList <- as.SpatialPolygons.PolygonsList(shapefilter@polygons, proj4string=CRS(as.character(NA)))  
 pointsWithPolygonsJoin <- sp::over(coords,spatialpolygonsList)
 fit <- round(x=length(pointsWithPolygonsJoin[complete.cases(pointsWithPolygonsJoin)]) / length(coords),2)
-
+ 
 
 #plot met polygonen met MEOW polygonen in het groen, een polygoon van de gazetteer in het blauw en waarnemingen in het rood
 leaflet() %>%
@@ -49,14 +54,20 @@ leaflet() %>%
   addPolygons(data = shapefilter) %>%
   addPolygons(data = shapeEcoregions,color = "green") 
 
-lat = data$decimalLatitude, lng = data$decimalLongitude
+# lat = data$decimalLatitude, lng = data$decimalLongitude
 #MEOW, LME, ... polygonen selecteren die overlappen met gebied uit gazetteer
 
-#Hoe groot is gazetteer gebied
- wkt <- mr_as_wkt(shapefilter)
+wkt <- mr_as_wkt(shapeEcoregions)
+
+ 
  
 sizeGazetteerRegion <- gArea(readWKT(wkt))
 
+intersect <- gIntersection(shapefilter,shapeEcoregions)
+
+intersectSize <- gArea(intersect)
+overlapping <- round(intersectSize/sizeGazetteerRegion , 2 )
+   
 #http://www.imachordata.com/meow-its-marine-ecoregions-in-r-2/ 
 
 
@@ -71,5 +82,14 @@ sp::plot(res)
 mr_names_search("EEZ", "Dutch Exclusive Economic Zone")
 #85668 mgrid
 
+#Waarnemingen dat binnen meow vallen + dataset connectie meow polygoon ID en waarneming ID
 
+spatialpolygonsListMEOW <- as.SpatialPolygons.PolygonsList(shapeEcoregions@polygons, proj4string=CRS(as.character(NA)))  
+obsJoinMEOW<- sp::over(coords,spatialpolygonsListMEOW,returnList = TRUE)
+
+#observaties + polygoon
+obsInMEOW <-  obsJoinMEOW[lapply(obsJoinMEOW,length)>0]
+
+#Observaties in MEOW
+ObsDataInMeow <-data[names(obsInMEOW),]
 
