@@ -4,7 +4,9 @@ install.packages("data.table")
 install.packages("devtools")
 install_github("ropenscilabs/mregions")
 install.packages("curl")
-install.packages("qdap")
+ install.packages("data.table")
+  
+ install.packages("sqldf")
 library("aquamapsdata")
 library("purrr")
 
@@ -12,8 +14,8 @@ library("igraph")
 library("devtools")
 library(rgdal)
 library(maptools)
-library(qdap)
-library(dplyr)
+ 
+ 
 library('httr')
 library('data.table')
 
@@ -22,6 +24,7 @@ library(rgeos)
 library("mregions")
 library("robis")
 library('leaflet')
+ library("sqldf")
 
 distribution <- wm_distribution(wm_name2id("Abra alba"))
  
@@ -90,6 +93,21 @@ obsJoinMEOW<- sp::over(coords,spatialpolygonsListMEOW,returnList = TRUE)
 #observaties + polygoon
 obsInMEOW <-  obsJoinMEOW[lapply(obsJoinMEOW,length)>0]
 
+
+
+#data frame met polygoon id en aantal obs
+ dt <- t(obsInMEOW)
+  
+dt <- data.frame(t(data.frame(obsInMEOW)))
+
+dummy <- data.frame(id=c(1:nrow(dt)),polygoon=dt[])
+names(dummy) <-c("id","waarde") 
+waardes <- sqldf("select waarde as 'polygoon',count(*) as 'aantal' from dummy group by waarde")
+
+ 
 #Observaties in MEOW
 ObsDataInMeow <-data[names(obsInMEOW),]
 
+dtf <- data.frame(age=rchisq(100000,10),group=factor(sample(1:10,100000,rep=T)))
+ 
+ obsInMEOW[c(1,2)]
