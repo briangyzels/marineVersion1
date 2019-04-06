@@ -82,14 +82,17 @@ sp::plot(res)
 mr_names_search("EEZ", "Dutch Exclusive Economic Zone")
 #85668 mgrid
 
-#Waarnemingen dat binnen meow vallen + dataset connectie meow polygoon ID en waarneming ID
 
-spatialpolygonsListMEOW <- as.SpatialPolygons.PolygonsList(shapeEcoregions@polygons, proj4string=CRS(as.character(NA)))  
-obsJoinMEOW<- sp::over(coords,spatialpolygonsListMEOW,returnList = TRUE)
 
 #observaties + polygoon
 obsInMEOW <-  obsJoinMEOW[lapply(obsJoinMEOW,length)>0]
 
 #Observaties in MEOW
 ObsDataInMeow <-data[names(obsInMEOW),]
+d <- data.frame(ObsDataInMeow$decimalLongitude,ObsDataInMeow$decimalLatitude)
+coords <-SpatialPoints(d, proj4string=CRS(as.character(NA)), bbox = NULL)
 
+#Waarnemingen dat binnen meow vallen + dataset connectie meow polygoon ID en waarneming ID
+
+spatialpolygonsListMEOW <- as.SpatialPolygons.PolygonsList(shapeEcoregions@polygons, proj4string=CRS(as.character(NA)))  
+obsJoinMEOW<- sp::over(coords,spatialpolygonsListMEOW,returnList = TRUE)
