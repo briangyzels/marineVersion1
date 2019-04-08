@@ -108,6 +108,4 @@ waardes <- sqldf("select waarde as 'polygoon',count(*) as 'aantal' from dummy gr
 #Observaties in MEOW
 ObsDataInMeow <-data[names(obsInMEOW),]
 
-dtf <- data.frame(age=rchisq(100000,10),group=factor(sample(1:10,100000,rep=T)))
- 
- obsInMEOW[c(1,2)]
+
