@@ -23,7 +23,7 @@ res<- mr_geojson(key = "MarineRegions:longhurst_longhurst") #NECS? hoe specifiek
 res<- mr_geojson(key= "MarineRegions:eez") #EEZ
 res<- mr_geojson(key= "Ecoregions:ecoregions") #MEOW
 res<-mr_geojson(key="MarineRegions:lme") #LME
-res
+ 
 mr_as_wkt(res, fmt = 5) # GeoJSON to WKT
 #install.packages("geojsonio")
 #if (requireNamespace("geojsonio")) {
