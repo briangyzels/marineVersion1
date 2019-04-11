@@ -23,7 +23,7 @@ library("leaflet")
 #Robis package
 
  
- data <- occurrence("Abra alba") 
+data <- occurrence(scientificname ="Abra alba") 
 #check of waarnemingen in een polygoon liggen
 #werkt
 d <- data.frame(data$decimalLatitude,data$decimalLongitude)
