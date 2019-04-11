@@ -34,7 +34,7 @@ meow3<- mr_records_by_type(type = "Marine Ecoregion of the World (MEOW)", offset
 
 longhurst<- mr_records_by_type(type = "Longhurst Province")
 town<- mr_records_by_type(type = "Town") 
-town2<- mr_records_by_type(type = "Town", offset=100)
+town2<- mr_records_by_type(type = "Arrondissement", offset=100)
 town3<- mr_records_by_type(type = "Town", offset=200)
 town4<- mr_records_by_type(type = "Town", offset=300)
 town5<- mr_records_by_type(type = "Town", offset=400) 
