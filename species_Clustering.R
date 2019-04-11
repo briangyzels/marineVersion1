@@ -107,19 +107,20 @@ sapply(d, function(x) sum(is.na(x)))
 #GetShapeFilesOfGazetteer
  
 
-for (i in 1:2){
+for (i in 1:5){
   MGRID <- str_split(distinct_distribution[i,]$locationID,"/",simplify = TRUE)
   response <- GET(url = paste("http://www.marineregions.org/rest/getGazetteerWMSes.json/",MGRID[5],"/",sep="") )
   record <- content(response)
   i
   shapeprobeer <- mr_shp(
-    key = paste(record[[1]]$namespace,record[[1]]$featureType, sep = ":"),  maxFeatures = 500, read = TRUE
+    key = paste(record[[1]]$namespace,record[[1]]$featureType, sep = ":"),  maxFeatures = 500
   )
   if (i>1){
     newGazetteerPolygon  <-shapeprobeer[toupper(shapeprobeer@data[,record[[1]]$featureName]) == toupper(record[[1]]$value),]
-    names(gazetteerPolygons) <- names(newGazetteerPolygon) 
-    
-     gazetteerPolygons <- rbind(gazetteerPolygons, newGazetteerPolygon, makeUniqueIDs = TRUE) 
+    # newGazetteerPolygon <- spChFIDs(newGazetteerPolygon, paste("b", row.names(newGazetteerPolygon), sep="."))
+    gazetteerPolygons@polygons <-   c(gazetteerPolygons@polygons,newGazetteerPolygon@polygons)
+     
+    # gazetteerPolygons <- spRbind(gazetteerPolygons,newGazetteerPolygon)
   }else
   {
        gazetteerPolygons <-shapeprobeer[toupper(shapeprobeer@data[,record[[1]]$featureName]) == toupper(record[[1]]$value),]
