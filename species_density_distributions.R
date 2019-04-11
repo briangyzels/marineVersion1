@@ -3,14 +3,54 @@ library(gridExtra)
 library(robis)
 library(mregions)
 library(ggmap)
-register_google(key = "...")
+register_google(key = "AIzaSyBZNTP4H1d_W0FcjrBf9yO3waT9rJ2kw60")
 has_google_key()
 library(ggplot2)
+library(MASS)
+install.packages('plotly')
+library(plotly)
+library(sp)
+install.packages('broom')
+library(broom)
+library(plyr)
+library(maptools)
+library(rgdal)
+library(worrms)
+library(stringr)
+library(sqldf)
+
 
 #Witte dunschaal
 data <- occurrence("Abra alba") 
-northseamap <- get_map(location = "north sea",  maptype = "satellite", source = "google", zoom =4)
-NSM <- ggmap(northseamap)
+northseamap <- get_map(location = "world",  maptype = "satellite", source = "google", zoom =1)
+Gazp.points = tidy(gazetteerPolygons)
+Gazp.df = join(Gazp.points, gazetteerPolygons@data, by="id")
+distribution <- wm_distribution(wm_name2id("Abra alba"))
+distinct_distribution <-sqldf("select distinct(locationID),locality from distribution")
+for (i in 1:2){
+  MGRID <- str_split(distinct_distribution[i,]$locationID,"/",simplify = TRUE)
+  response <- GET(url = paste("http://www.marineregions.org/rest/getGazetteerWMSes.json/",MGRID[5],"/",sep="") )
+  record <- content(response)
+  i
+  shapeprobeer <- mr_shp(
+    key = paste(record[[1]]$namespace,record[[1]]$featureType, sep = ":"),  maxFeatures = 500, read = TRUE
+  )
+  if (i>1){
+    newGazetteerPolygon  <-shapeprobeer[toupper(shapeprobeer@data[,record[[1]]$featureName]) == toupper(record[[1]]$value),]
+    names(gazetteerPolygons) <- names(newGazetteerPolygon) 
+    
+    gazetteerPolygons <- rbind(gazetteerPolygons, newGazetteerPolygon, makeUniqueIDs = TRUE) 
+  }else
+  {
+    gazetteerPolygons <-shapeprobeer[toupper(shapeprobeer@data[,record[[1]]$featureName]) == toupper(record[[1]]$value),]
+    
+  }
+  
+}
+NSM <- ggmap(northseamap, extent = "normal", maprange = FALSE) +
+  geom_polygon(data = Gazp.df,
+               aes(long, lat, group = group), 
+               fill = "orange", colour = "red", alpha = 0.5)
 plot1 <- NSM + stat_density2d(
   aes(x = data$decimalLongitude, y = data$decimalLatitude, fill = ..level.., alpha = 0.3),
   size = 0.5, bins = 800, data = data, geom = "polygon") + geom_density2d(data = data, aes(x=data$decimalLongitude, y = data$decimalLatitude), size = 0.1)   
@@ -19,18 +59,21 @@ plot2<- NSM + stat_density2d(
   size = 0.2, bins = 8, data = ABAL_aqm, geom = "polygon") + geom_density2d(data = ABAL_aqm, aes(x=ABAL_aqm$Long, y = ABAL_aqm$Lat), size = 0.1) 
 grid.arrange(plot1, plot2, ncol=2)
 
+
+
 #Schol
 data <- occurrence("Pleuronectes platessa") 
 northseamap <- get_map(location = "north sea",  maptype = "satellite", source = "google", zoom =4)
 NSM <- ggmap(northseamap)
 plot1 <- NSM + stat_density2d(
-  aes(x = data$decimalLongitude, y = data$decimalLatitude, fill = ..level.., alpha = 0.3),
-  size = 0.5, bins = 800, data = data, geom = "polygon") + geom_density2d(data = data, aes(x=data$decimalLongitude, y = data$decimalLatitude), size = 0.1)   
+  aes(x = data$decimalLongitude, y = data$decimalLatitude, fill = ..level.., alpha = 0.5),
+  size = 0.5,h=5, data = data, geom = "polygon") + geom_density2d(data = data, aes(x=data$decimalLongitude, y = data$decimalLatitude), size = 0.1, colour="white", alpha=0.4)   
 plot2<- NSM + stat_density2d(
-  aes(x = PLPL$Long, y = PLPL$Lat, fill = ..level.., alpha = 0.1),
-  size = 0.2, bins = 8, data = PLPL, geom = "polygon") + geom_density2d(data = PLPL, aes(x=PLPL$Long, y = PLPL$Lat), size = 0.1) 
+  aes(x = PLPL$Long, y = PLPL$Lat, fill = ..level.., alpha = 0.5),
+  size = 0.2, h=1, data = PLPL, geom = "polygon") +  scale_fill_gradient(low = "red", high = "yellow") + geom_density2d(data = PLPL, aes(x=PLPL$Long, y = PLPL$Lat), size = 0.1, colour="white", alpha=0.4) 
 grid.arrange(plot1, plot2, ncol=2)
 
+NSM + stat_bkde2d(bandwidth=c(0.5, 4), data= data, aes(fill = ..level..), geom = "polygon")
 # Hondshaai
 data <- occurrence("Scyliorhinus canicula") 
 northseamap2 <- get_map(location = "north sea",  maptype = "satellite", source = "google", zoom =3)
@@ -95,3 +138,17 @@ grid.arrange(plot1, plot2, ncol=2)
 
 ## punten
 geom_point(aes(x = data$decimalLongitude, y = data$decimalLatitude), data = data, colour= "black", alpha=0.02, size = 0.2)
+
+#bin size
+install.packages('UsingR')
+library(UsingR)
+install.packages("tkrplot")
+library(tkrplot)
+source("http://homepage.divms.uiowa.edu/~luke/classes/STAT7400/examples/tkdens.R")
+tkdens(x=data$decimalLongitude, y = data$decimalLatitude, tkrplot=TRUE)
+install.packages("ggalt")
+library(ggalt)
+stat_bkde2d(mapping = NULL, data = NULL, geom = "density2d",
+            position = "identity", contour = TRUE, bandwidth = NULL,
+            grid_size = c(51, 51), range.x = NULL, truncate = TRUE, na.rm = FALSE,
+            show.legend = NA, inherit.aes = TRUE, ...)
