@@ -1,5 +1,7 @@
 install.packages("igraph")
+library("devtools")
 install_github("raquamaps/aquamapsdata")
+library(aquamapsdata)
 install.packages("data.table") 
  
 library("worrms")
@@ -9,10 +11,10 @@ library("purrr")
 
 library("igraph")
 library("devtools")
-library(rgdal)
-library(maptools)
-library(rgeos)
-library(dplyr)
+library("rgdal")
+library("maptools")
+library("rgeos")
+library("dplyr")
 library('httr')
 library('data.table')
 library("mregions")
@@ -47,7 +49,7 @@ sea<- mr_records_by_type(type = "Sea")
 
 #39 plaatsen zoeken in deze en plotten op kaart
 #https://recology.info/2016/06/marine-regions/
-shp <- mr_shp(key= "MarineRegions:eez",filter = "Belgian Exclusive Economic Zone")
+res <- mr_shp(key= "MarineRegions:eez_", maxFeatures=200)
 View(wkt)
 wkt <- mr_as_wkt(shp)
 gArea(readWKT(wkt))
@@ -81,42 +83,7 @@ shp <- mr_shp(key= "Ecoregions:ecoregions")#dit argument lijkt niet te bestaan?
 
 #nog nodig?
 #https://databasin.org/datasets/3b6b12e7bcca419990c9081c0af254a2 download shapefiles in zip bestand en unzip
-ogrInfo("../../MEOW-TNC", "meow_ecos") # naam mgl veranderen
-#Unite the spatial polygons for each region into one
- 
-provinces <- unionSpatialPolygons(regions, regions$PROVINCE) #hogere orde= gemakkelijker?
-#Make a data frame that will have Province level info and above
-prov_data <- regions@data %>%
-  group_by(PROVINCE) %>%
-  summarise(PROV_CODE = PROV_CODE[1], REALM = REALM[1], RLM_CODE=RLM_CODE[1], Lat_Zone=Lat_Zone[1])
-#merge the polygons with the new data file
-#note the row.names argument to make sure they map to each other
-provinces <- SpatialPolygonsDataFrame(provinces, 
-                                      data=data.frame(
-                                        join(data.frame(PROVINCE=names(provinces)),
-                                             prov_data),
-                                        row.names=row.names(provinces)))
-#make spatial polygons for realms
-realms <- unionSpatialPolygons(regions, regions$REALM)
 
-#make new data
-realm_data <- regions@data %>%
-  group_by(REALM) %>%
-  summarise(RLM_CODE = RLM_CODE[1],  Lat_Zone=Lat_Zone[1])
-
-#merge the two!
-realms <- SpatialPolygonsDataFrame(realms, 
-                                   data=data.frame(
-                                     join(data.frame(REALM=names(realms)),
-                                          realm_data),
-                                     row.names=row.names(realms)))
-#########Plot them all
-par(mfrow=c(2,2), mar=c(0,0,0,0))
-plot(regions, main="Ecoregion", cex.main=5)
-plot(provinces, lwd=2, border="red", main="Province")
-plot(realms, lwd=2, border="blue", main="Realm")
-par(mfrow=c(1,1))
-## nicer figures => GGPLOT2
 
 #Volgende stap is het selecteren van enkele meow polygonen/provincies/realms en de overlapping te plotten met gazetteer gebieden
 #https://cran.r-project.org/web/packages/sp/vignettes/over.pdf
@@ -126,6 +93,7 @@ par(mfrow=c(1,1))
 
 download_db(force = TRUE)
 my_db <- aquamapsdata:::src_sqlite_aquamapsdata()
+#SQL QUERY => get data for abra alba 
 my_db %>% tbl("nativemaps")
 my_db %>% tbl("hcaf")
 my_db %>% tbl("hspen")

@@ -93,7 +93,7 @@ obsInMEOW <-  obsJoinMEOW[lapply(obsJoinMEOW,length)>0]
 
 
 #data frame met polygoon id en aantal obs
- dt <- t(obsInMEOW)
+dt <- t(obsInMEOW)
   
 dt <- data.frame(t(data.frame(obsInMEOW)))
 
