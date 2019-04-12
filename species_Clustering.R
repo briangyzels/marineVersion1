@@ -18,10 +18,7 @@ library("proxy")
 library("dplyr")
 library("curl")
 library("stringr")
-source("ShapeFunction.R")
-names(d) <- c("x","y")
-summary(d)
-
+ 
  sum <- 0
 
 shapeEEZ  <- mr_shp(
@@ -37,8 +34,8 @@ ShapeLME <- mr_shp(
 #get gazetteer data of variable
 distribution <- wm_distribution(wm_name2id("Abra alba"))
 distinct_distribution <-sqldf("select distinct(locationID),locality from distribution")
-wm_record(id = 105706)
-polygonDF <- SpatialPolygonsDataFrame(SpatialPolygons(list()))
+ 
+ 
 gazetteerPolygonDF<- data.frame( MGRID=character(),
                   GazetteerName=character(),
                  OverlappingMEOW=numeric(),
@@ -48,7 +45,7 @@ gazetteerPolygonDF<- data.frame( MGRID=character(),
                  Size = numeric(),stringsAsFactors=FALSE
                  ) 
   
-for (i in 1:1){
+for (i in 1:3){
 MGRID <- str_split(distinct_distribution[i,]$locationID,"/",simplify = TRUE)
 response <- GET(url = paste("http://www.marineregions.org/rest/getGazetteerWMSes.json/",MGRID[5],"/",sep="") )
 record <- content(response)
@@ -70,11 +67,11 @@ intersectMEOW <- gIntersection(filterd,shapeEcoregions)
 gazetteerPolygonDF[i,]$OverlappingMEOW <- round(gArea(intersectMEOW)/sizeGazetteerRegion , 2 )
 
 #gazetteerPolygonDF.OverlappingLME
-intersectLME <- gIntersection(filterd,shapeEcoregions)
+intersectLME <- gIntersection(filterd,ShapeLME)
 gazetteerPolygonDF[i,]$OverlappingLME <- round(gArea(intersectLME)/sizeGazetteerRegion , 2 )
 
 #gazetteerPolygonDF.OverlappingEEZ
-intersectEEZ <- gIntersection(filterd,shapeEcoregions)
+intersectEEZ <- gIntersection(filterd,shapeEEZ)
 gazetteerPolygonDF[i,]$OverlappingEEZ <- round(gArea(intersectEEZ)/sizeGazetteerRegion , 2 )
 
 #gazetteerPolygonDF.numberOfOBs
