@@ -25,7 +25,7 @@ p.scaled
 n<- 50000
 x<- data$decimalLongitude
 y<- data$decimalLatitude
-f1 <- kde2d(x=data$decimalLongitude, y=data$decimalLatitude, n=1000)
+f1 <- kde2d(x=data$decimalLongitude, y=data$decimalLatitude, n=5000)
 f2 <-kde2d(x=data$decimalLongitude, y=data$decimalLatitude)
 lims <- c(min(x),max(x),min(y),max(y))
 
