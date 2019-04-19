@@ -48,20 +48,9 @@ O2 <- data.frame( ID = names(obsInLME),
 # return the number of points in each polygon:
  
 # O2 <- over(coords,spatialpolygonsListLME, returnList = TRUE) #ID => z-waarden van opzoeken
- 
 
- 
 
 coordinates(d) = ~ x + y
-
-
-
-
-## eerst een join met de ids van de observaties die vallen in de polygonen en de ids van de dataset d waar de x en y coordinaten staan
-
-res <- d %>% left_join(w, by = c("ID" )) %>%
-  mutate(Values=coalesce(Values.x,Values.y)) %>%
-  select(-Values.x,-Values.y)
 
 
 ## z-value ophalen van coordinaten die opverlappen met polygoon
