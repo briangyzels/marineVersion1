@@ -16,14 +16,7 @@ library("stringr")
 
 
 library("neuralnet")
-
-
-
-
-shapeLME <- mr_shp(
-  key = "MarineRegions:lme" ,maxFeatures = 500 
-)
-
+ 
 LMETrainingset   <- data.frame( LMEid = numeric(),
                                 Species = character(),
                          NumberObsNear = numeric(),
