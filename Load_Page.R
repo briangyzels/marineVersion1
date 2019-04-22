@@ -1,5 +1,5 @@
 
-
+library("leaflet")
 library("mregions")
 library("robis")
 
@@ -12,7 +12,7 @@ shapeEcoregions <- mr_shp(
 shapeLME <- mr_shp(
   key = "MarineRegions:lme" ,maxFeatures = 500 
 )
-
+shapeLME <-shapeLME[order(shapeLME@data$lme_number),]
 
 specieses <- c("Abra Alba","Pleuronectes platessa","Phoca vitulina","Aurelia aurita","Dermochelys coriacea")
 coords = list()
@@ -21,3 +21,8 @@ for (a in 1:5){
   d <- data.frame(data$decimalLongitude,data$decimalLatitude)
   coords[a] <-SpatialPoints(d, proj4string=CRS(as.character(NA)), bbox = NULL)
 }
+ 
+
+leaflet() %>%
+  addTiles() %>%
+  addPolygons(data = b[c(22),])

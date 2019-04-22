@@ -33,7 +33,7 @@ for (a in 1:5){
   coords[a] <-SpatialPoints(d, proj4string=CRS(as.character(NA)), bbox = NULL)
 }
 
-for (j in 1:5){
+for (j in 3:5){
 
 for (i in 1:length(shapeLME)){
  
@@ -48,7 +48,7 @@ for (i in 1:length(shapeLME)){
   LMETrainingset [i+(j-1)*66,]$NumberOfObs <- sum(lapply(listObsInPolygon,length)>0)
   
   #LMEdata.numberofOBSNear
-  if (!i ==30){
+  if (!i ==35){
     neighboursIDs <-gTouches(shapeLME[i,],shapeLME, byid=TRUE,returnDense = FALSE)
     
     if (length(neighboursIDs[[1]])>0){
@@ -89,7 +89,7 @@ LMETest <- data.frame( LMEid = numeric(),
                                 Size = numeric(),
                                 stringsAsFactors=FALSE
 ) 
-dataTest <- occurrence("Tursiops truncatus") 
+dataTest <- occurrence("Manta birostris") 
 dtest <- data.frame(dataTest$decimalLongitude,dataTest$decimalLatitude)
 coordstest <-SpatialPoints(dtest, proj4string=CRS(as.character(NA)), bbox = NULL)
 
@@ -106,7 +106,7 @@ for (i in 1:length(shapeLME)){
   LMETest [i,]$NumberOfObs <- sum(lapply(listObsInPolygon,length)>0)
   
   #LMEdata.numberofOBSNear
-  if (!i ==30){
+  if (!i ==35){
     neighboursIDs <-gTouches(shapeLME[i,],shapeLME, byid=TRUE,returnDense = FALSE)
     
     if (length(neighboursIDs[[1]])>0){

@@ -76,7 +76,7 @@ LMEdata[i,]$objectID <- i
  LMEdata[i,]$NumberOfObs <- sum(lapply(listObsInPolygon,length)>0)
 
 #LMEdata.numberofOBSNear
- if (!i ==30){
+ if (!i ==35){
  neighboursIDs <-gTouches(shapeLME[i,],shapeLME, byid=TRUE,returnDense = FALSE)
  
  if (length(neighboursIDs[[1]])>0){
