@@ -13,6 +13,9 @@ shapeLME <- mr_shp(
   key = "MarineRegions:lme" ,maxFeatures = 500 
 )
 shapeLME <-shapeLME[order(shapeLME@data$lme_number),]
+shapeEcoregions <- shapeEcoregions[shapeEcoregions@data$eco_code,]
+
+  
 
 specieses <- c("Abra Alba","Pleuronectes platessa","Phoca vitulina","Aurelia aurita","Dermochelys coriacea")
 coords = list()
